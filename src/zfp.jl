@@ -12,3 +12,14 @@ struct CompressedTimeArray{T,N}
         return new{dtype, length(dims)}(data, positions, dims, eltype)
     end
 end
+
+function CompressedTimeArray(array::AbstractArray{<:AbstractFloat}; timedim::Integer=1)
+    compArray = CompressedTimeArray(eltype(array), size(array)..., timedim=timedim)
+
+    data = zfp_compress(array, write_header=false)
+    fileSize = length(data)
+    append!(compArray.data, data)
+    push!(compArray.positions, fileSize)
+
+    return compArray
+end
