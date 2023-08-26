@@ -15,6 +15,20 @@ struct CompressedTimeArray{T,N}
     end
 end
 
+Base.size(compArray::CompressedTimeArray) = compArray.dims
+Base.IndexStyle(::Type{<:CompressedTimeArray}) = IndexCartesian()
+function Base.getindex(compArray::CompressedTimeArray{T,N}, timeidx::Int, spaceidx::Vararg{Int}) where {T,N}
+    decompArray = zeros(T, compArray.dims[begin+1:end])
+    zfp_decompress!(decompArray, compArray.data[compArray.tailpositions[timeidx]:compArray.headpositions[timeidx]])
+    return decompArray[spaceidx...]
+end
+
+function Base.getindex(compArray::CompressedTimeArray{T,N}, timeidx::Int, spaceidx::Vararg{Colon}) where {T,N}
+    decompArray = zeros(T, compArray.dims[begin+1:end])
+    zfp_decompress!(decompArray, compArray.data[compArray.tailpositions[timeidx]:compArray.headpositions[timeidx]])
+    return decompArray
+end
+
 function CompressedTimeArray(array::AbstractArray{<:AbstractFloat}; timedim::Integer=1)
     compArray = CompressedTimeArray(eltype(array), size(array)..., timedim=timedim)
 
