@@ -103,6 +103,31 @@ function Base.append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T
     return nothing
 end
 
+"""
+    CompressedArraySeq(array::AbstractArray{<:AbstractFloat})
+
+Create a new CompressedArraySeq from an uncompressed array.
+
+# Arguments
+
+    array::AbstractArray{<:AbstractFloat}: Initial array to compress and store.
+
+# Example
+
+```jldoctest
+julia> using SequentialCompression
+
+julia> array = [Float64(i + j) for i=1:4, j=1:4];
+
+julia> compArray = CompressedArraySeq(array);
+
+julia> compArray[1] == array
+true
+
+julia> compArray.timedim
+1
+```
+"""
 function CompressedArraySeq(array::AbstractArray{<:AbstractFloat})
     compArray = CompressedArraySeq(eltype(array), size(array)...)
     append!(compArray, array)
