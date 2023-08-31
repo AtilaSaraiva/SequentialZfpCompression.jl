@@ -123,7 +123,8 @@ julia> compArray.timedim
 """
 function Base.append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T,N}) where {T<:AbstractFloat, N}
     data = zfp_compress(array, write_header=false,
-                               tol=compArray.tol, precision=compArray.precision, rate=compArray.rate)
+                        tol=compArray.tol, precision=compArray.precision, rate=compArray.rate,
+                        nthreads=Threads.nthreads())
     fileSize = length(data)
     append!(compArray.data, data)
     push!(compArray.tailpositions, compArray.headpositions[end]+1)
