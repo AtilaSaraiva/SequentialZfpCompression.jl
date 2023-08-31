@@ -40,10 +40,27 @@ mutable struct CompressedArraySeq{T,Nx}
     end
 end
 
+"""
+    size(compArray::CompressedArraySeq)
+
+Returns the dimensions of the uncompressed array, with the last dimension being the time dimension.
+"""
 Base.size(compArray::CompressedArraySeq) = (compArray.spacedim..., compArray.timedim)
+
+"""
+    ndims(compArray::CompressedArraySeq)
+
+Returns the number of dimensions of the uncompressed array, including the time dimension.
+"""
 Base.ndims(compArray::CompressedArraySeq) = length(compArray.spacedim) + 1
+
 Base.IndexStyle(::Type{<:CompressedArraySeq}) = IndexLinear()
 
+"""
+    getindex(compArray::CompressedArraySeq, timeidx::Int)
+
+Retrieve and decompress a single time slice from `compArray` at `timeidx`.
+"""
 Base.@propagate_inbounds function Base.getindex(compArray::CompressedArraySeq, timeidx::Int)
     @boundscheck timeidx <= compArray.timedim || throw(BoundsError(compArray, timeidx))
 
@@ -53,6 +70,11 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedArraySeq, t
     return decompArray
 end
 
+"""
+    getindex(compArray::CompressedArraySeq, timeidx::Colon)
+
+Retrieve and decompress all time slices from `compArray`.
+"""
 function Base.getindex(compArray::CompressedArraySeq, timeidx::Colon)
     decompArray = zeros(compArray.eltype, compArray.spacedim..., compArray.timedim)
     for i in 1:length(compArray.tailpositions)-1
