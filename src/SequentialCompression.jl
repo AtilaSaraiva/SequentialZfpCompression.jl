@@ -2,7 +2,7 @@ module SequentialCompression
 
 using ZfpCompression: zfp_compress, zfp_decompress!
 
-include("zfp.jl")
+include("seqcomp.jl")
 
 export CompressedArraySeq
 
