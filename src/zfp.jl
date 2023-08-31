@@ -32,8 +32,8 @@ mutable struct CompressedArraySeq{T,Nx}
 
     function CompressedArraySeq(dtype::DataType, spacedim::Integer...)
         data = Vector{UInt8}()
-        headpositions = Int64[0]
-        tailpositions = Int64[0]
+        headpositions = Int64[0] # trick to avoid checking for the first iteration in the append! function
+        tailpositions = Int64[0] # which means the timedim = length(tailpositions) - 1
         eltype = dtype
         timedim = 0
         return new{dtype, length(spacedim)}(data, headpositions, tailpositions, spacedim, timedim, eltype)
@@ -77,7 +77,7 @@ Retrieve and decompress all time slices from `compArray`.
 """
 function Base.getindex(compArray::CompressedArraySeq, timeidx::Colon)
     decompArray = zeros(compArray.eltype, compArray.spacedim..., compArray.timedim)
-    for i in 1:length(compArray.tailpositions)-1
+    for i in 1:length(compArray.tailpositions)-1 # -1 because timedim = length(tailpositions) - 1
         auxArray = zeros(compArray.eltype, compArray.spacedim...)
         @inbounds zfp_decompress!(auxArray, compArray.data[compArray.tailpositions[i+1]:compArray.headpositions[i+1]])
         decompArray[:,:,i] = auxArray
