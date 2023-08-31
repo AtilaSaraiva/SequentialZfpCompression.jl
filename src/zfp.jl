@@ -63,6 +63,36 @@ function Base.getindex(compArray::CompressedArraySeq, timeidx::Colon)
     return decompArray
 end
 
+"""
+append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T,N})
+
+Append a new time slice to compArray, compressing array in the process.
+
+# Arguments
+
+    compArray::CompressedArraySeq{T,N}: Existing compressed array.
+    array::AbstractArray{T,N}: Uncompressed array to append.
+
+# Example
+
+```jldoctest
+julia> using SequentialCompression
+
+julia> compArray = CompressedArraySeq(Float64, 4, 4);
+
+julia> append!(compArray, ones(4, 4));
+
+julia> compArray[1]
+4×4 Matrix{Float64}:
+ 1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0
+
+julia> compArray.timedim
+1
+```
+"""
 function Base.append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T,N}) where {T<:AbstractFloat, N}
     data = zfp_compress(array, write_header=false)
     fileSize = length(data)
