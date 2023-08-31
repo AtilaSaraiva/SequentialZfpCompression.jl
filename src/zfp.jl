@@ -16,7 +16,7 @@ A mutable structure for storing time-dependent arrays in a compressed format.
 julia> using SequentialCompression
 
 julia> compArray = CompressedArraySeq(Float64, 4, 4)
-CompressedArraySeq{Float64, 2}(UInt8[], [0], [0], (4, 4), 0, Float64)
+CompressedArraySeq{Float64, 2}(UInt8[], [0], [0], (4, 4), 0, Float64, 0.0f0, 0.0f0, 0)
 
 julia> compArray.timedim
 0
