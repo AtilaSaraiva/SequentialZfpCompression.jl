@@ -11,7 +11,7 @@ mutable struct CompressedArraySeq{T,Nx}
         headpositions = Int64[0]
         tailpositions = Int64[0]
         eltype = dtype
-        timedim = 1
+        timedim = 0
         return new{dtype, length(spacedim)}(data, headpositions, tailpositions, spacedim, timedim, eltype)
     end
 end
@@ -20,16 +20,21 @@ Base.size(compArray::CompressedArraySeq) = (compArray.spacedim..., compArray.tim
 Base.ndims(compArray::CompressedArraySeq) = length(compArray.spacedim) + 1
 Base.IndexStyle(::Type{<:CompressedArraySeq}) = IndexLinear()
 
-function Base.getindex(compArray::CompressedArraySeq, timeidx::Int)
+Base.@propagate_inbounds function Base.getindex(compArray::CompressedArraySeq, timeidx::Int)
+    @boundscheck timeidx <= compArray.timedim || throw(BoundsError(compArray, timeidx))
+
     decompArray = zeros(compArray.eltype, compArray.spacedim...)
-    zfp_decompress!(decompArray, compArray.data[compArray.tailpositions[timeidx+1]:compArray.headpositions[timeidx+1]])
+    @inbounds zfp_decompress!(decompArray,
+                              compArray.data[compArray.tailpositions[timeidx+1]:compArray.headpositions[timeidx+1]])
     return decompArray
 end
 
 function Base.getindex(compArray::CompressedArraySeq, timeidx::Colon)
-    decompArray = zeros(compArray.eltype, compArray.spacedim..., timedim)
-    @views for i in 1:length(compArray.tailpositions)
-        zfp_decompress!(decompArray[:,:,i], compArray.data[compArray.tailpositions[i+1]:compArray.headpositions[i+1]])
+    decompArray = zeros(compArray.eltype, compArray.spacedim..., compArray.timedim)
+    for i in 1:length(compArray.tailpositions)-1
+        auxArray = zeros(compArray.eltype, compArray.spacedim...)
+        @inbounds zfp_decompress!(auxArray, compArray.data[compArray.tailpositions[i+1]:compArray.headpositions[i+1]])
+        decompArray[:,:,i] = auxArray
     end
     return decompArray
 end
