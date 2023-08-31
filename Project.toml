@@ -4,6 +4,7 @@ authors = ["Átila Saraiva Quintela Soares"]
 version = "0.1.0"
 
 [deps]
+Mmap = "a63ad114-7e13-5084-954f-fe012c677804"
 ZfpCompression = "43441a71-1662-41c6-b8ea-40ed1525242b"
 
 [compat]
