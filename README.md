@@ -38,6 +38,6 @@ append!(compSeq, A3)
 ## TODO
 
 - [X] Add bound checking
-- [ ] Add documentation for each method
+- [X] Add documentation for each method
 - [ ] Add support for compression rate, tolerance and precision
 - [ ] Add support for parallel compression
