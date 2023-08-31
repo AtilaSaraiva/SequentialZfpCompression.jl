@@ -1,3 +1,27 @@
+"""
+    CompressedArraySeq{T,Nx}
+
+A mutable structure for storing time-dependent arrays in a compressed format.
+
+# Fields
+- `data::Vector{UInt8}`: Compressed data in byte form.
+- `headpositions::Vector{Int64}`: Positions of the beginning of each time slice in `data`.
+- `tailpositions::Vector{Int64}`: Positions of the end of each time slice in `data`.
+- `spacedim::NTuple{Nx,Int32}`: Dimensions of the spatial grid.
+- `timedim::Int32`: Number of time steps.
+- `eltype::Type{T}`: Element type of the uncompressed array.
+
+# Example
+```jldoctest
+julia> using SequentialCompression
+
+julia> compArray = CompressedArraySeq(Float64, 4, 4)
+CompressedArraySeq{Float64, 2}(UInt8[], [0], [0], (4, 4), 0, Float64)
+
+julia> compArray.timedim
+0
+```
+"""
 mutable struct CompressedArraySeq{T,Nx}
     data::Vector{UInt8}
     headpositions::Vector{Int64}
