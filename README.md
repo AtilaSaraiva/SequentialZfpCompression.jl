@@ -39,5 +39,7 @@ append!(compSeq, A3)
 
 - [X] Add bound checking
 - [X] Add documentation for each method
-- [ ] Add support for compression rate, tolerance and precision
-- [ ] Add support for parallel compression
+- [X] Add support for compression rate, tolerance and precision
+- [X] Add support for parallel compression
+- [ ] Add support to write to a file and read it back
+- [ ] Add support to compress the array in slices, one for each thread
