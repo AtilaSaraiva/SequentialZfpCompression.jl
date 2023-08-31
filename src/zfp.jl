@@ -10,6 +10,9 @@ A mutable structure for storing time-dependent arrays in a compressed format.
 - `spacedim::NTuple{Nx,Int32}`: Dimensions of the spatial grid.
 - `timedim::Int32`: Number of time steps.
 - `eltype::Type{T}`: Element type of the uncompressed array.
+- tol::Float32: [Mean absolute error that is tolerated](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode).
+- precision::Float32: [Controls the precision, bounding a weak relative error](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode).
+- rate::Int64: [Fixes the bits used per value](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode).
 
 # Example
 ```jldoctest
@@ -134,13 +137,16 @@ function Base.append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T
 end
 
 """
-    CompressedArraySeq(array::AbstractArray{<:AbstractFloat})
+    CompressedArraySeq(array::AbstractArray{<:AbstractFloat}; rate::Int=0, tol::Real=0, precision::Real=0)
 
 Create a new CompressedArraySeq from an uncompressed array.
 
 # Arguments
 
     array::AbstractArray{<:AbstractFloat}: Initial array to compress and store.
+    rate::Int: [Fixes the bits used per value](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode).
+    tol::Real: [Mean absolute error that is tolerated](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode).
+    precision::Real: [Controls the precision, bounding a weak relative error](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode).
 
 # Example
 
