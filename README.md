@@ -34,3 +34,10 @@ append!(compSeq, A3)
 @test compSeq[2] == A2
 @test compSeq[3] == A3
 ```
+
+## TODO
+
+- [ ] Add bound checking
+- [ ] Add documentation for each method
+- [ ] Add support for compression rate, tolerance and precision
+- [ ] Add support for parallel compression
