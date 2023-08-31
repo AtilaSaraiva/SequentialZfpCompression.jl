@@ -11,6 +11,16 @@ using Test
             append!(Ac, ones(dtype, n, m))
 
             @test all(Ac[2] .== 1)
+
+            B = rand(dtype, n,m,3)
+
+            Bc = CompressedArraySeq(dtype, n,m)
+
+            for i = 1:3
+                append!(Bc, B[:,:,i])
+            end
+
+            @test Bc[:] == B
         end
     end
 end
