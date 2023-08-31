@@ -1,53 +1,51 @@
-struct CompressedTimeArray{T,N}
+mutable struct CompressedArraySeq{T,Nx}
     data::Vector{UInt8}
     headpositions::Vector{Int64}
     tailpositions::Vector{Int64}
-    dims::NTuple{N,Int32}
+    spacedim::NTuple{Nx,Int32}
+    timedim::Int32
     eltype::Type{T}
 
-    function CompressedTimeArray(dtype::DataType, spacedim::Integer...; timedim::Integer)
+    function CompressedArraySeq(dtype::DataType, spacedim::Integer...)
         data = Vector{UInt8}()
-        headpositions = Vector{Int64}()
-        tailpositions = Vector{Int64}()
+        headpositions = Int64[0]
+        tailpositions = Int64[0]
         eltype = dtype
-        dims = (timedim, spacedim...)
-        return new{dtype, length(dims)}(data, headpositions, tailpositions, dims, eltype)
+        timedim = 1
+        return new{dtype, length(spacedim)}(data, headpositions, tailpositions, spacedim, timedim, eltype)
     end
 end
 
-Base.size(compArray::CompressedTimeArray) = compArray.dims
-Base.ndims(compArray::CompressedTimeArray) = length(compArray.dims)
-Base.IndexStyle(::Type{<:CompressedTimeArray}) = IndexCartesian()
-function Base.getindex(compArray::CompressedTimeArray{T,N}, timeidx::Int, spaceidx::Vararg{Int}) where {T,N}
-    decompArray = zeros(T, compArray.dims[begin+1:end])
-    zfp_decompress!(decompArray, compArray.data[compArray.tailpositions[timeidx]:compArray.headpositions[timeidx]])
-    return decompArray[spaceidx...]
-end
+Base.size(compArray::CompressedArraySeq) = (compArray.spacedim..., compArray.timedim)
+Base.ndims(compArray::CompressedArraySeq) = length(compArray.spacedim) + 1
+Base.IndexStyle(::Type{<:CompressedArraySeq}) = IndexLinear()
 
-function Base.getindex(compArray::CompressedTimeArray{T,N}, timeidx::Int, spaceidx::Vararg{Colon}) where {T,N}
-    decompArray = zeros(T, compArray.dims[begin+1:end])
-    zfp_decompress!(decompArray, compArray.data[compArray.tailpositions[timeidx]:compArray.headpositions[timeidx]])
+function Base.getindex(compArray::CompressedArraySeq, timeidx::Int)
+    decompArray = zeros(compArray.eltype, compArray.spacedim...)
+    zfp_decompress!(decompArray, compArray.data[compArray.tailpositions[timeidx+1]:compArray.headpositions[timeidx+1]])
     return decompArray
 end
 
-function Base.append!(compArray::CompressedTimeArray, array::AbstractArray{<:Number, N}) where {N}
-    @assert ndims(array) == ndims(compArray) - 1
+function Base.getindex(compArray::CompressedArraySeq, timeidx::Colon)
+    decompArray = zeros(compArray.eltype, compArray.spacedim..., timedim)
+    @views for i in 1:length(compArray.tailpositions)
+        zfp_decompress!(decompArray[:,:,i], compArray.data[compArray.tailpositions[i+1]:compArray.headpositions[i+1]])
+    end
+    return decompArray
+end
+
+function Base.append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T,N}) where {T<:AbstractFloat, N}
     data = zfp_compress(array, write_header=false)
     fileSize = length(data)
     append!(compArray.data, data)
     push!(compArray.tailpositions, compArray.headpositions[end]+1)
     push!(compArray.headpositions, compArray.headpositions[end]+fileSize)
+    compArray.timedim += 1
     return nothing
 end
 
-function CompressedTimeArray(array::AbstractArray{<:AbstractFloat}; timedim::Integer=1)
-    compArray = CompressedTimeArray(eltype(array), size(array)..., timedim=timedim)
-
-    data = zfp_compress(array, write_header=false)
-    fileSize = length(data)
-    append!(compArray.data, data)
-    push!(compArray.tailpositions, 1)
-    push!(compArray.headpositions, fileSize)
-
+function CompressedArraySeq(array::AbstractArray{<:AbstractFloat})
+    compArray = CompressedArraySeq(eltype(array), size(array)...)
+    append!(compArray, array)
     return compArray
 end
