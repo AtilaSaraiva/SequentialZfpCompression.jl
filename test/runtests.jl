@@ -12,6 +12,9 @@ using Test
 
             @test all(Ac[2] .== 1)
 
+            @test size(Ac) == (n, m, 2)
+            @test ndims(Ac) == 3
+
             B = rand(dtype, n,m,3)
 
             Bc = CompressedArraySeq(dtype, n,m)
