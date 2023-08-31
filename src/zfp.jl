@@ -16,7 +16,7 @@ A mutable structure for storing time-dependent arrays in a compressed format.
 julia> using SequentialCompression
 
 julia> compArray = CompressedArraySeq(Float64, 4, 4)
-CompressedArraySeq{Float64, 2}(UInt8[], [0], [0], (4, 4), 0, Float64)
+CompressedArraySeq{Float64, 2}(UInt8[], [0], [0], (4, 4), 0, Float64, 0.0f0, 0.0f0, 0)
 
 julia> compArray.timedim
 0
@@ -29,14 +29,18 @@ mutable struct CompressedArraySeq{T,Nx}
     spacedim::NTuple{Nx,Int32}
     timedim::Int32
     eltype::Type{T}
+    tol::Float32
+    precision::Float32
+    rate::Int64
 
-    function CompressedArraySeq(dtype::DataType, spacedim::Integer...)
+    function CompressedArraySeq(dtype::DataType, spacedim::Integer...; rate::Int=0, tol::Real=0, precision::Real=0)
         data = Vector{UInt8}()
         headpositions = Int64[0] # trick to avoid checking for the first iteration in the append! function
         tailpositions = Int64[0] # which means the timedim = length(tailpositions) - 1
         eltype = dtype
         timedim = 0
-        return new{dtype, length(spacedim)}(data, headpositions, tailpositions, spacedim, timedim, eltype)
+
+        return new{dtype, length(spacedim)}(data, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate)
     end
 end
 
@@ -66,7 +70,8 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedArraySeq, t
 
     decompArray = zeros(compArray.eltype, compArray.spacedim...)
     @inbounds zfp_decompress!(decompArray,
-                              compArray.data[compArray.tailpositions[timeidx+1]:compArray.headpositions[timeidx+1]])
+                              compArray.data[compArray.tailpositions[timeidx+1]:compArray.headpositions[timeidx+1]];
+                              tol=compArray.tol, precision=compArray.precision, rate=compArray.rate)
     return decompArray
 end
 
@@ -79,7 +84,8 @@ function Base.getindex(compArray::CompressedArraySeq, timeidx::Colon)
     decompArray = zeros(compArray.eltype, compArray.spacedim..., compArray.timedim)
     for i in 1:length(compArray.tailpositions)-1 # -1 because timedim = length(tailpositions) - 1
         auxArray = zeros(compArray.eltype, compArray.spacedim...)
-        @inbounds zfp_decompress!(auxArray, compArray.data[compArray.tailpositions[i+1]:compArray.headpositions[i+1]])
+        @inbounds zfp_decompress!(auxArray, compArray.data[compArray.tailpositions[i+1]:compArray.headpositions[i+1]];
+                                  tol=compArray.tol, precision=compArray.precision, rate=compArray.rate)
         decompArray[:,:,i] = auxArray
     end
     return decompArray
@@ -116,7 +122,9 @@ julia> compArray.timedim
 ```
 """
 function Base.append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T,N}) where {T<:AbstractFloat, N}
-    data = zfp_compress(array, write_header=false)
+    data = zfp_compress(array, write_header=false,
+                        tol=compArray.tol, precision=compArray.precision, rate=compArray.rate,
+                        nthreads=Threads.nthreads())
     fileSize = length(data)
     append!(compArray.data, data)
     push!(compArray.tailpositions, compArray.headpositions[end]+1)
@@ -150,8 +158,8 @@ julia> compArray.timedim
 1
 ```
 """
-function CompressedArraySeq(array::AbstractArray{<:AbstractFloat})
-    compArray = CompressedArraySeq(eltype(array), size(array)...)
+function CompressedArraySeq(array::AbstractArray{<:AbstractFloat}; rate::Int=0, tol::Real=0, precision::Real=0)
+    compArray = CompressedArraySeq(eltype(array), size(array)...; rate, tol, precision)
     append!(compArray, array)
     return compArray
 end
