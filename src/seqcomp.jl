@@ -119,37 +119,3 @@ function Base.append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T
     compArray.timedim += 1
     return nothing
 end
-
-"""
-    CompressedArraySeq(array::AbstractArray{<:AbstractFloat}; rate::Int=0, tol::Real=0, precision::Real=0)
-
-Create a new CompressedArraySeq from an uncompressed array.
-
-# Arguments
-
-    array::AbstractArray{<:AbstractFloat}: Initial array to compress and store.
-    rate::Int: [Fixes the bits used per value](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode).
-    tol::Real: [Mean absolute error that is tolerated](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode).
-    precision::Real: [Controls the precision, bounding a weak relative error](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode).
-
-# Example
-
-```jldoctest
-julia> using SequentialCompression
-
-julia> array = [Float64(i + j) for i=1:4, j=1:4];
-
-julia> compArray = CompressedArraySeq(array);
-
-julia> compArray[1] == array
-true
-
-julia> compArray.timedim
-1
-```
-"""
-function CompressedArraySeq(array::AbstractArray{<:AbstractFloat}; rate::Int=0, tol::Real=0, precision::Real=0)
-    compArray = CompressedArraySeq(eltype(array), size(array)...; rate, tol, precision)
-    append!(compArray, array)
-    return compArray
-end
