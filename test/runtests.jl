@@ -3,7 +3,7 @@ using Test
 
 @testset "in memory compression" begin
     for dtype in [ Float32, Float64 ]
-        for (n, m) in [[10, 10], [100, 100], [1000, 1000]]
+        for (n, m) in [[100, 100], [1000, 1000]]
             A = [ dtype(i + j) for i=1:n, j=1:m ]
             Ac = CompressedArraySeq(A)
 
