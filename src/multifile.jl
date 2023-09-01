@@ -37,6 +37,12 @@ mutable struct CompressedMultiFileArraySeq{T,Nx}
     end
 end
 
+Base.size(compArray::CompressedMultiFileArraySeq) = (compArray.spacedim..., compArray.timedim)
+
+Base.ndims(compArray::CompressedMultiFileArraySeq) = length(compArray.spacedim) + 1
+
+Base.IndexStyle(::Type{<:CompressedMultiFileArraySeq}) = IndexLinear()
+
 ax(A) = map(N->1:N, A.spacedim)
 dims(region) = map(r -> r[end] - r[1] + 1, region)
 
