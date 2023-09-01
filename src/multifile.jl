@@ -4,7 +4,7 @@
 A compressed time-dependent array that is stored in multiple files, one per thread.
 
 # Fields
-- `files::Vector{IOStream}`: Compressed data in byte form.
+- `files::Vector{IOStream}`: IO object for each array slice.
 - `headpositions::Vector{Int64}`: Positions of the beginning of each time slice in `data`.
 - `tailpositions::Vector{Int64}`: Positions of the end of each time slice in `data`.
 - `spacedim::NTuple{Nx,Int32}`: Dimensions of the spatial grid.
