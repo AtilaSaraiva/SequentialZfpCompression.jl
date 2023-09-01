@@ -25,7 +25,7 @@ julia> compArray.timedim
 0
 ```
 """
-mutable struct CompressedArraySeq{T,Nx}
+mutable struct CompressedArraySeq{T,Nx} <: AbstractCompArraySeq
     data::Vector{UInt8}
     headpositions::Vector{Int64}
     tailpositions::Vector{Int64}
@@ -48,20 +48,20 @@ mutable struct CompressedArraySeq{T,Nx}
 end
 
 """
-    size(compArray::CompressedArraySeq)
+    size(compArray::AbstractCompArraySeq)
 
 Returns the dimensions of the uncompressed array, with the last dimension being the time dimension.
 """
-Base.size(compArray::CompressedArraySeq) = (compArray.spacedim..., compArray.timedim)
+Base.size(compArray::AbstractCompArraySeq) = (compArray.spacedim..., compArray.timedim)
 
 """
-    ndims(compArray::CompressedArraySeq)
+    ndims(compArray::AbstractCompArraySeq)
 
 Returns the number of dimensions of the uncompressed array, including the time dimension.
 """
-Base.ndims(compArray::CompressedArraySeq) = length(compArray.spacedim) + 1
+Base.ndims(compArray::AbstractCompArraySeq) = length(compArray.spacedim) + 1
 
-Base.IndexStyle(::Type{<:CompressedArraySeq}) = IndexLinear()
+Base.IndexStyle(::Type{<:AbstractCompArraySeq}) = IndexLinear()
 
 """
     getindex(compArray::CompressedArraySeq, timeidx::Int)
@@ -75,22 +75,6 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedArraySeq, t
     @inbounds zfp_decompress!(decompArray,
                               compArray.data[compArray.tailpositions[timeidx+1]:compArray.headpositions[timeidx+1]];
                               tol=compArray.tol, precision=compArray.precision, rate=compArray.rate)
-    return decompArray
-end
-
-"""
-    getindex(compArray::CompressedArraySeq, timeidx::Colon)
-
-Retrieve and decompress all time slices from `compArray`.
-"""
-function Base.getindex(compArray::CompressedArraySeq, timeidx::Colon)
-    decompArray = zeros(compArray.eltype, compArray.spacedim..., compArray.timedim)
-    for i in 1:length(compArray.tailpositions)-1 # -1 because timedim = length(tailpositions) - 1
-        auxArray = zeros(compArray.eltype, compArray.spacedim...)
-        @inbounds zfp_decompress!(auxArray, compArray.data[compArray.tailpositions[i+1]:compArray.headpositions[i+1]];
-                                  tol=compArray.tol, precision=compArray.precision, rate=compArray.rate)
-        decompArray[:,:,i] = auxArray
-    end
     return decompArray
 end
 

@@ -5,6 +5,8 @@ using Mmap: mmap, sync!
 using TiledIteration: SplitAxes
 using Base.Threads: @threads, nthreads
 
+abstract type AbstractCompArraySeq end
+
 include("seqcomp.jl")
 include("multifile.jl")
 

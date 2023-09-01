@@ -17,7 +17,7 @@ A compressed time-dependent array that is stored in multiple files, one per thre
 # Arguments exclusive for the constructor
 - `filepaths::Union{Vector{String}, String}="/tmp/seqcomp"`: Path(s) to the files where the compressed data will be stored. If only one string is passed, the same path will be used for all threads.
 """
-mutable struct CompressedMultiFileArraySeq{T,Nx}
+mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
     files::Vector{IOStream}
     headpositions::Vector{Int64}
     tailpositions::Vector{Int64}
@@ -56,12 +56,6 @@ mutable struct CompressedMultiFileArraySeq{T,Nx}
     end
 end
 
-Base.size(compArray::CompressedMultiFileArraySeq) = (compArray.spacedim..., compArray.timedim)
-
-Base.ndims(compArray::CompressedMultiFileArraySeq) = length(compArray.spacedim) + 1
-
-Base.IndexStyle(::Type{<:CompressedMultiFileArraySeq}) = IndexLinear()
-
 ax(A) = map(N->1:N, A.spacedim)
 dims(region) = map(r -> r[end] - r[1] + 1, region)
 posIdx(timeidx, threadidx) = (timeidx-1)*Threads.nthreads() + threadidx
@@ -87,7 +81,7 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedMultiFileAr
     end
 end
 
-function Base.getindex(compArray::CompressedMultiFileArraySeq, timeidx::Colon)
+function Base.getindex(compArray::AbstractCompArraySeq, timeidx::Colon)
     decompArray = zeros(compArray.eltype, compArray.spacedim..., compArray.timedim)
     for i in 1:compArray.timedim
         @inbounds decompArray[:,:, i] = compArray[i]
