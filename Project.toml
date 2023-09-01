@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 Mmap = "a63ad114-7e13-5084-954f-fe012c677804"
+TiledIteration = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 ZfpCompression = "43441a71-1662-41c6-b8ea-40ed1525242b"
 
 [compat]
