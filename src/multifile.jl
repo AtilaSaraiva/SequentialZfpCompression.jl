@@ -68,6 +68,14 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedMultiFileAr
     end
 end
 
+function Base.getindex(compArray::CompressedMultiFileArraySeq, timeidx::Colon)
+    decompArray = zeros(compArray.eltype, compArray.spacedim..., compArray.timedim)
+    for i in 1:compArray.timedim
+        @inbounds decompArray[:,:, i] = compArray[i]
+    end
+    return decompArray
+end
+
 function Base.append!(compArray::CompressedMultiFileArraySeq{T,N}, array::AbstractArray{T,N}) where {T<:AbstractFloat, N}
 
     let nth = Threads.nthreads()
