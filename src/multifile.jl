@@ -1,3 +1,22 @@
+"""
+    CompressedMultiFileArraySeq{T,Nx}
+
+A compressed time-dependent array that is stored in multiple files, one per thread.
+
+# Fields
+- `files::Vector{IOStream}`: Compressed data in byte form.
+- `headpositions::Vector{Int64}`: Positions of the beginning of each time slice in `data`.
+- `tailpositions::Vector{Int64}`: Positions of the end of each time slice in `data`.
+- `spacedim::NTuple{Nx,Int32}`: Dimensions of the spatial grid.
+- `timedim::Int32`: Number of time steps.
+- `eltype::Type{T}`: Element type of the uncompressed array.
+- tol::Float32: [Mean absolute error that is tolerated](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode).
+- precision::Float32: [Controls the precision, bounding a weak relative error](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode).
+- rate::Int64: [Fixes the bits used per value](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode).
+
+# Arguments exclusive for the constructor
+- `filepaths::Union{Vector{String}, String}="/tmp/seqcomp"`: Path(s) to the files where the compressed data will be stored. If only one string is passed, the same path will be used for all threads.
+"""
 mutable struct CompressedMultiFileArraySeq{T,Nx}
     files::Vector{IOStream}
     headpositions::Vector{Int64}
