@@ -41,5 +41,5 @@ append!(compSeq, A3)
 - [X] Add documentation for each method
 - [X] Add support for compression rate, tolerance and precision
 - [X] Add support for parallel compression
-- [ ] Add support to write to a file and read it back
-- [ ] Add support to compress the array in slices, one for each thread
+- [X] Add support to compress the array in slices, one for each thread
+- [ ] Add support to dump the struct to a file and read it back
