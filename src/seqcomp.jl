@@ -79,7 +79,7 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedArraySeq, t
 end
 
 """
-append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T,N})
+    append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T,N})
 
 Append a new time slice to compArray, compressing array in the process.
 
