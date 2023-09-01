@@ -54,6 +54,21 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
 
         end
     end
+
+    # For custom outer constructors
+    function CompressedMultiFileArraySeq(
+        files::Vector{IOStream}
+        headpositions::Vector{Int64}
+        tailpositions::Vector{Int64}
+        spacedim::NTuple{Nx,Int32}
+        timedim::Int32
+        eltype::DataType
+        tol::Float32
+        precision::Float32
+        rate::Int64)
+
+        return new{eltype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate)
+    end
 end
 
 ax(A) = map(N->1:N, A.spacedim)
