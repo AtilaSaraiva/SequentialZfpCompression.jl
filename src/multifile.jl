@@ -46,7 +46,7 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
           end # creates a [IOStream, IOStream, ...]
 
           headpositions = zeros(Int64, nth) # trick to avoid checking for the first iteration in the append! function
-          tailpositions = zeros(Int64, nth) # which means the timedim = length(tailpositions) - 1
+          tailpositions = zeros(Int64, nth) # which means the timedim = length(tailpositions) - Threads.nthreads()
           eltype = dtype
           timedim = 0
 
