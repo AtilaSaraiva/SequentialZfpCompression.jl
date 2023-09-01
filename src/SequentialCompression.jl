@@ -1,9 +1,14 @@
 module SequentialCompression
 
 using ZfpCompression: zfp_compress, zfp_decompress!
+using TiledIteration: SplitAxes
+using Base.Threads: @threads, nthreads
 
-include("zfp.jl")
+abstract type AbstractCompArraySeq end
 
-export CompressedArraySeq
+include("seqcomp.jl")
+include("multifile.jl")
+
+export CompressedArraySeq, CompressedMultiFileArraySeq
 
 end
