@@ -45,6 +45,7 @@ Base.IndexStyle(::Type{<:CompressedMultiFileArraySeq}) = IndexLinear()
 
 ax(A) = map(N->1:N, A.spacedim)
 dims(region) = map(r -> r[end] - r[1] + 1, region)
+posIdx(timeidx, threadidx) = (timeidx-1)*Threads.nthreads() + threadidx
 
 Base.@propagate_inbounds function Base.getindex(compArray::CompressedMultiFileArraySeq, timeidx::Int)
     @boundscheck timeidx <= compArray.timedim || throw(BoundsError(compArray, timeidx))
@@ -54,7 +55,7 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedMultiFileAr
       decompArray = zeros(compArray.eltype, compArray.spacedim...)
 
       @threads for (i, region) in collect(enumerate(SplitAxes(ax(compArray), nth)))
-          seek(compArray.files[i], compArray.headpositions[timeidx*nth+i]-1)
+          seek(compArray.files[i], compArray.headpositions[posIdx(timeidx+1, i)]-1)
           compressedVector = read(compArray.files[i], compArray.tailpositions[(timeidx)*nth+i] - compArray.headpositions[(timeidx)*nth+i] + 1)
           decomp = zeros(compArray.eltype, dims(region))
           zfp_decompress!(decomp, compressedVector;
@@ -81,8 +82,8 @@ function Base.append!(compArray::CompressedMultiFileArraySeq{T,N}, array::Abstra
           fileSize = length(data)
           seekend(compArray.files[i])
           write(compArray.files[i], data)
-          auxHeadPosition[i] = compArray.headpositions[end-nth+i] + 1
-          auxTailPosition[i] = compArray.headpositions[end-nth+i] + fileSize
+          auxHeadPosition[i] = compArray.tailpositions[end-nth+i] + 1
+          auxTailPosition[i] = compArray.tailpositions[end-nth+i] + fileSize
       end
 
       append!(compArray.headpositions, auxHeadPosition)
