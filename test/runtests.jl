@@ -1,4 +1,4 @@
-using SequentialCompression
+import SequentialCompression as sc
 using Test
 
 @testset "in memory compression" begin
@@ -6,7 +6,7 @@ using Test
         for (n, m) in [[100, 100], [1000, 1000]]
             B = rand(dtype, n,m,3)
 
-            Bc = CompressedArraySeq(dtype, n,m)
+            Bc = sc.CompressedArraySeq(dtype, n,m)
 
             for i = 1:3
                 append!(Bc, B[:,:,i])
@@ -29,7 +29,7 @@ end
         for (n, m) in [[100, 100], [1000, 1000]]
             B = rand(dtype, n,m,3)
 
-            Bc = CompressedMultiFileArraySeq(dtype, n,m)
+            Bc = sc.CompressedMultiFileArraySeq(dtype, n,m)
 
             for i = 1:3
                 append!(Bc, B[:,:,i])

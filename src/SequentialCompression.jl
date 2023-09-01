@@ -8,7 +8,8 @@ abstract type AbstractCompArraySeq end
 
 include("seqcomp.jl")
 include("multifile.jl")
+include("unified_constructor.jl")
 
-export CompressedArraySeq, CompressedMultiFileArraySeq
+export SeqCompressor
 
 end

@@ -10,20 +10,9 @@ A mutable structure for storing time-dependent arrays in a compressed format.
 - `spacedim::NTuple{Nx,Int32}`: Dimensions of the spatial grid.
 - `timedim::Int32`: Number of time steps.
 - `eltype::Type{T}`: Element type of the uncompressed array.
-- tol::Float32: [Mean absolute error that is tolerated](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode).
-- precision::Float32: [Controls the precision, bounding a weak relative error](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode).
-- rate::Int64: [Fixes the bits used per value](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode).
-
-# Example
-```jldoctest
-julia> using SequentialCompression
-
-julia> compArray = CompressedArraySeq(Float64, 4, 4)
-CompressedArraySeq{Float64, 2}(UInt8[], [0], [0], (4, 4), 0, Float64, 0.0f0, 0.0f0, 0)
-
-julia> compArray.timedim
-0
-```
+- `tol::Float32`: [Mean absolute error that is tolerated](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode).
+- `precision::Float32`: [Controls the precision, bounding a weak relative error](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode).
+- `rate::Int64`: [Fixes the bits used per value](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode).
 """
 mutable struct CompressedArraySeq{T,Nx} <: AbstractCompArraySeq
     data::Vector{UInt8}
@@ -64,7 +53,7 @@ Base.ndims(compArray::AbstractCompArraySeq) = length(compArray.spacedim) + 1
 Base.IndexStyle(::Type{<:AbstractCompArraySeq}) = IndexLinear()
 
 """
-    getindex(compArray::CompressedArraySeq, timeidx::Int)
+    getindex(compArray::AbstractCompArraySeq, timeidx::Int)
 
 Retrieve and decompress a single time slice from `compArray` at `timeidx`.
 """
@@ -87,25 +76,6 @@ Append a new time slice to compArray, compressing array in the process.
 
     compArray::CompressedArraySeq{T,N}: Existing compressed array.
     array::AbstractArray{T,N}: Uncompressed array to append.
-
-# Example
-
-```jldoctest
-julia> using SequentialCompression
-
-julia> compArray = CompressedArraySeq(Float64, 4, 4);
-
-julia> append!(compArray, ones(4, 4));
-
-julia> compArray[1]
-4×4 Matrix{Float64}:
- 1.0  1.0  1.0  1.0
- 1.0  1.0  1.0  1.0
- 1.0  1.0  1.0  1.0
- 1.0  1.0  1.0  1.0
-
-julia> compArray.timedim
-1
 ```
 """
 function Base.append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T,N}) where {T<:AbstractFloat, N}
@@ -118,38 +88,4 @@ function Base.append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T
     push!(compArray.headpositions, compArray.headpositions[end]+fileSize)
     compArray.timedim += 1
     return nothing
-end
-
-"""
-    CompressedArraySeq(array::AbstractArray{<:AbstractFloat}; rate::Int=0, tol::Real=0, precision::Real=0)
-
-Create a new CompressedArraySeq from an uncompressed array.
-
-# Arguments
-
-    array::AbstractArray{<:AbstractFloat}: Initial array to compress and store.
-    rate::Int: [Fixes the bits used per value](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode).
-    tol::Real: [Mean absolute error that is tolerated](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode).
-    precision::Real: [Controls the precision, bounding a weak relative error](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode).
-
-# Example
-
-```jldoctest
-julia> using SequentialCompression
-
-julia> array = [Float64(i + j) for i=1:4, j=1:4];
-
-julia> compArray = CompressedArraySeq(array);
-
-julia> compArray[1] == array
-true
-
-julia> compArray.timedim
-1
-```
-"""
-function CompressedArraySeq(array::AbstractArray{<:AbstractFloat}; rate::Int=0, tol::Real=0, precision::Real=0)
-    compArray = CompressedArraySeq(eltype(array), size(array)...; rate, tol, precision)
-    append!(compArray, array)
-    return compArray
 end
