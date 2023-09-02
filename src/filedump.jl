@@ -41,6 +41,17 @@ function vectorToCommaSeparatedString(vector::Vector{String})
     return string
 end
 
+function save(metadataFilepath::String, data::CompressedMultiFileArraySeq)
+    nameWithoutExtension = split(metadataFilepath, ".")[1]
+    dataFilepath = map(1:length(data.files)) do i
+        nameWithoutExtension * "_data_" * string(i) * ".bin"
+    end
+
+    save(metadataFilepath, dataFilepath, data)
+
+    return nothing
+end
+
 function save(metadataFilepath::String, dataFilepath::Vector{String},
               data::CompressedMultiFileArraySeq)
 
