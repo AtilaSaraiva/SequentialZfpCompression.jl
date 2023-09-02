@@ -45,6 +45,31 @@ compSeq2 = load("myarrays.szfp")
 @test compSeq[:] == compSeq2[:]
 ```
 
+## Lossy compression
+
+Lossy compression is achieved by specifying additional keyword arguments
+for `SeqCompressor`, which are `tol::Real`, `precision::Int`, and `rate::Real`.
+If none are specified (as in the example above) the compression is lossless
+(i.e. reversible). Lossy compression parameters are
+
+- [`tol` defines the maximum absolute error that is tolerated.](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode)
+- [`precision` controls the precision, bounding a weak relative error](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode), see this [FAQ](https://zfp.readthedocs.io/en/develop/faq.html#q-relerr)
+- [`rate` fixes the bits used per value.](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode)
+
+## Multi file out-of-core parallel compression and decompression
+
+This package has two workflows for compression. It can compress the array into a `Vector{UInt8}` and
+keep it in memory, or it can slice the array and compress each slice, saving each slice to different
+files, one per thread.
+
+To use this out-of-core approach, you have four options:
++ Use the `inmemory=false` keyword to `SeqCompressor`. This will create the files for you in `tmpdir()`,
++ Specify `filepaths::Vector{String}` keyword argument with a list of folders, one for each thread,
++ Specify `filepaths::String` keyword argument with just one folder that will hold all the files,
++ Specify `envVarPath::String` keyword argument with the name of a environment variable that holds
+  the path to the folder that will hold all the files. This might be useful if you are using a SLURM
+  cluster, that allows you to access the local node storage via the `SLURM_TMPDIR` environment variable.
+
 ## TODO
 
 - [X] Add bound checking
