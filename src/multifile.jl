@@ -100,8 +100,9 @@ end
 
 function Base.getindex(compArray::AbstractCompArraySeq, timeidx::Colon)
     decompArray = zeros(compArray.eltype, compArray.spacedim..., compArray.timedim)
+    ndimensions = ndims(compArray)
     for i in 1:compArray.timedim
-        @inbounds decompArray[:,:, i] = compArray[i]
+        selectdim(decompArray, ndimensions , i) .= compArray[i]
     end
     return decompArray
 end
