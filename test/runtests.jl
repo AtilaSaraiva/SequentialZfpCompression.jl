@@ -53,7 +53,14 @@ end
             metadatapath, _ = mktemp(cleanup=true)
             datapath = [ mktemp(cleanup=true) |> first for i in 1:Bc.nth ]
 
+            # Giving the data path as a vector
             sc.save(metadatapath, datapath,  Bc)
+            Bcloaded = sc.load(metadatapath)
+
+            @test Bcloaded[:] == B
+
+            # Infering the data path from the metadata path
+            sc.save(metadatapath, Bc)
             Bcloaded = sc.load(metadatapath)
 
             @test Bcloaded[:] == B
