@@ -27,6 +27,7 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
     tol::Float32
     precision::Float32
     rate::Int64
+    nth::Int16
 
     function CompressedMultiFileArraySeq(dtype::DataType, spacedim::Integer...;
                                          rate::Int=0, tol::Real=0, precision::Real=0,
@@ -50,9 +51,25 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
           eltype = dtype
           timedim = 0
 
-          return new{dtype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate)
+          return new{dtype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, Int16(nth))
 
         end
+    end
+
+    # For custom outer constructors
+    function CompressedMultiFileArraySeq(
+        files::Vector{IOStream},
+        headpositions::Vector{Int64},
+        tailpositions::Vector{Int64},
+        spacedim::NTuple{Nx,Int32},
+        timedim::Int32,
+        eltype::DataType,
+        tol::Float32,
+        precision::Float32,
+        rate::Int64,
+        nth::Int16) where Nx
+
+        return new{eltype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth)
     end
 end
 
@@ -63,7 +80,7 @@ posIdx(timeidx, threadidx) = (timeidx-1)*Threads.nthreads() + threadidx
 Base.@propagate_inbounds function Base.getindex(compArray::CompressedMultiFileArraySeq, timeidx::Int)
     @boundscheck timeidx <= compArray.timedim || throw(BoundsError(compArray, timeidx))
 
-    let nth = Threads.nthreads()
+    let nth = compArray.nth
 
       decompArray = zeros(compArray.eltype, compArray.spacedim...)
 
@@ -91,7 +108,7 @@ end
 
 function Base.append!(compArray::CompressedMultiFileArraySeq{T,N}, array::AbstractArray{T,N}) where {T<:AbstractFloat, N}
 
-    let nth = Threads.nthreads()
+    let nth = compArray.nth
 
       auxHeadPosition = Vector{Int64}(undef, nth)
       auxTailPosition = Vector{Int64}(undef, nth)

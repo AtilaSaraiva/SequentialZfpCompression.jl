@@ -9,6 +9,7 @@ Construct a `CompressedArraySeq` or `CompressedMultiFileArraySeq` depending on t
 # Arguments
 - `dtype::DataType`: the type of the array to be compressed
 - `spacedim::Integer...`: the dimensions of the array to be compressed
+- `inmemory::Bool=true`: whether the compressed data will be stored in memory or in disk
 - `rate::Int64`: [Fixes the bits used per value](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode).
 - `tol::Float32`: [Mean absolute error that is tolerated](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode).
 - `precision::Float32`: [Controls the precision, bounding a weak relative error](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode).
@@ -48,16 +49,17 @@ julia> size(A)
 ```
 """
 function SeqCompressor(dtype::DataType, spacedim::Integer...;
+                       inmemory::Bool=true,
                        rate::Int=0, tol::Real=0, precision::Real=0,
                        filepaths::Union{Vector{String}, String}="",
                        envVarPath::String="")
 
-    if filepaths == ""
-        if envVarPath != ""
-            filepaths = ENV[envVarPath]
-        else
-            return CompressedArraySeq(dtype, spacedim...; rate=rate, tol=tol, precision=precision)
-        end
+    if inmemory && filepaths == "" && envVarPath == ""
+        return CompressedArraySeq(dtype, spacedim...; rate=rate, tol=tol, precision=precision)
+    end
+
+    if envVarPath != ""
+        filepaths = ENV[envVarPath]
     end
 
     return CompressedMultiFileArraySeq(dtype, spacedim...;

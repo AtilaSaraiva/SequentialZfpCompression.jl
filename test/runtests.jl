@@ -20,6 +20,12 @@ using Test
             @test Bc[3] == B[:,:,3]
 
             @test Bc[:] == B
+
+            path, _ = mktemp(cleanup=true)
+            sc.save(path, Bc)
+            Bcloaded = sc.load(path)
+
+            @test Bcloaded[:] == B
         end
     end
 end
@@ -43,6 +49,14 @@ end
             @test Bc[3] == B[:,:,3]
 
             @test Bc[:] == B
+
+            metadatapath, _ = mktemp(cleanup=true)
+            datapath = [ mktemp(cleanup=true) |> first for i in 1:Bc.nth ]
+
+            sc.save(metadatapath, datapath,  Bc)
+            Bcloaded = sc.load(metadatapath)
+
+            @test Bcloaded[:] == B
         end
     end
 end
