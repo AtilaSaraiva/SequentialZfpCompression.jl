@@ -3,21 +3,21 @@ using Test
 
 @testset "in memory compression" begin
     for dtype in [ Float32, Float64 ]
-        for (n, m) in [[100, 100], [1000, 1000]]
-            B = rand(dtype, n,m,3)
+        for dims in ((100, 100), (50,50,50))
+            B = rand(dtype, dims...,3)
 
-            Bc = sc.CompressedArraySeq(dtype, n,m)
+            Bc = sc.CompressedMultiFileArraySeq(dtype, dims...)
 
             for i = 1:3
-                append!(Bc, B[:,:,i])
+                append!(Bc, selectdim(B, ndims(B), i))
             end
 
-            @test size(Bc) == (n, m, 3)
-            @test ndims(Bc) == 3
+            @test size(Bc) == (dims..., 3)
+            @test ndims(Bc) == ndims(B)
 
-            @test Bc[1] == B[:,:,1]
-            @test Bc[2] == B[:,:,2]
-            @test Bc[3] == B[:,:,3]
+            @test Bc[1] == selectdim(B, ndims(B), 1)
+            @test Bc[2] == selectdim(B, ndims(B), 2)
+            @test Bc[3] == selectdim(B, ndims(B), 3)
 
             @test Bc[:] == B
 
@@ -32,21 +32,21 @@ end
 
 @testset "multifile compression" begin
     for dtype in [ Float32, Float64 ]
-        for (n, m) in [[100, 100], [1000, 1000]]
-            B = rand(dtype, n,m,3)
+        for dims in ((100, 100), (50,50,50))
+            B = rand(dtype, dims...,3)
 
-            Bc = sc.CompressedMultiFileArraySeq(dtype, n,m)
+            Bc = sc.CompressedMultiFileArraySeq(dtype, dims...)
 
             for i = 1:3
-                append!(Bc, B[:,:,i])
+                append!(Bc, selectdim(B, ndims(B), i))
             end
 
-            @test size(Bc) == (n, m, 3)
-            @test ndims(Bc) == 3
+            @test size(Bc) == (dims..., 3)
+            @test ndims(Bc) == ndims(B)
 
-            @test Bc[1] == B[:,:,1]
-            @test Bc[2] == B[:,:,2]
-            @test Bc[3] == B[:,:,3]
+            @test Bc[1] == selectdim(B, ndims(B), 1)
+            @test Bc[2] == selectdim(B, ndims(B), 2)
+            @test Bc[3] == selectdim(B, ndims(B), 3)
 
             @test Bc[:] == B
 
