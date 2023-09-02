@@ -62,6 +62,14 @@ function save(metadataFilepath::String, dataFilepath::Vector{String},
         dataFilepathString = vectorToCommaSeparatedString(dataFilepath)
         write(io, dataFilepathString)
     end
+
+    for i in 1:length(dataFilepath)
+        open(dataFilepath[i], "w") do io
+            seekstart(data.files[i])
+            write(io, read(data.files[i]))
+        end
+    end
+    return nothing
 end
 
 function loadCompressedMultiFileArraySeq(io)
@@ -84,16 +92,22 @@ function loadCompressedMultiFileArraySeq(io)
     dataFilepathString = read(io, String)
     dataFilepath = split(dataFilepathString, ",")
 
-    @show timedim
-    @show spacedim
-    @show nth
-    @show tol
-    @show rate
-    @show precision
-    @show eltype
-    @show headpositions
-    @show tailpositions
-    @show dataFilepath
+    files = map(dataFilepath) do path
+        open(path, "r+")
+    end # creates a [IOStream, IOStream, ...]
+
+    return CompressedMultiFileArraySeq(
+              files,
+              headpositions,
+              tailpositions,
+              spacedim,
+              timedim,
+              eltype,
+              tol,
+              precision,
+              rate,
+              nth
+           )
 end
 
 function load(filename::String)
