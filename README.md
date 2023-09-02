@@ -44,4 +44,4 @@ append!(compSeq, A3)
 - [X] Add support to compress the array in slices, one for each thread
 - [X] Add support to dump the struct to a file and read it back
 - [ ] Make typing more robust
-- [ ] Add more save methods for the multifile case
+- [X] Add more save methods for the multifile case
