@@ -18,14 +18,15 @@ using SequentialCompression
 using Test
 
 # Lets define a few arrays to compress
-A1 = rand(100,100)
-A2 = rand(100,100)
-A3 = rand(100,100)
+A1 = rand(Float32, 100,100,100)
+A2 = rand(Float32, 100,100,100)
+A3 = rand(Float32, 100,100,100)
 
 # Initializing the compressed array sequence
-compSeq = CompressedArraySeq(A1)
+compSeq = SeqCompressor(Float32, 100, 100, 100)
 
-# Compressing a the rest of the arrays
+# Compressing the arrays
+append!(compSeq, A1)
 append!(compSeq, A2)
 append!(compSeq, A3)
 
@@ -33,6 +34,15 @@ append!(compSeq, A3)
 @test compSeq[1] == A1
 @test compSeq[2] == A2
 @test compSeq[3] == A3
+
+# Dumping to a file
+save("myarrays.szfp", compSeq)
+
+# Reading it back
+compSeq2 = load("myarrays.szfp")
+
+# Asserting the loaded type is the same
+@test compSeq[:] == compSeq2[:]
 ```
 
 ## TODO
