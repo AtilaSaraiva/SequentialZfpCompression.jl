@@ -9,6 +9,21 @@ This package aims to provide a nice interface for compression of multiple arrays
 sequence. These arrays can be up to 4D. The intended application is to store snapshots of a iterative
 process such as a simulation or optimization process. Since sometimes these processes may require a lot of iterations, having compression might save you some RAM. This package uses the [ZFP compression algorithm](https://zfp.io/) algorithm.
 
+##  A few comments before you start reading the code.
+
+This code implements an vector like interface to access compressed
+arrays at different time indexes, so to understand the code you need
+to first read [the julia documentation on indexing
+interfaces](https://docs.julialang.org/en/v1/manual/interfaces/#Indexing).
+Basically, I had to implement a method for the `Base.getindex` function which governs if an type
+can be indexed like an array or vector. I also wrote a method for the function `Base.append!` to
+ add new arrays to the sequential collection of compressed arrays.
+
+I also use functions like [`fill`](https://docs.julialang.org/en/v1/base/arrays/#Base.fill) and
+[`map`](https://docs.julialang.org/en/v1/base/collections/#Base.map), so reading the documentation
+on these functions might also help.
+
+
 ## Example
 
 Here is an simple example of its usage. Imagine these A1 till A3 arrays are snapshots of a iterative process.
