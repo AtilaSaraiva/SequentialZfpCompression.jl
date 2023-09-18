@@ -58,6 +58,11 @@ function SeqCompressor(dtype::DataType, spacedim::Integer...;
         return CompressedArraySeq(dtype, spacedim...; rate=rate, tol=tol, precision=precision)
     end
 
+    if filepaths == ""
+        return CompressedMultiFileArraySeq(dtype, spacedim...;
+                                           rate=rate, tol=tol, precision=precision)
+    end
+
     if envVarPath != ""
         filepaths = ENV[envVarPath]
     end
