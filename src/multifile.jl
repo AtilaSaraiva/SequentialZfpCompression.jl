@@ -25,12 +25,12 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
     timedim::Int32
     eltype::Type{T}
     tol::Float32
-    precision::Float32
+    precision::Int64
     rate::Int64
     nth::Int16
 
     function CompressedMultiFileArraySeq(dtype::DataType, spacedim::Integer...;
-                                         rate::Int=0, tol::Real=0, precision::Real=0,
+                                         rate::Int=0, tol::Real=0, precision::Int=0,
                                          filepaths::Union{Vector{String}, String}="/tmp/seqcomp")
 
         nth = min(Threads.nthreads(), spacedim[end]) |> Int16
@@ -66,7 +66,7 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
         timedim::Int32,
         eltype::DataType,
         tol::Float32,
-        precision::Float32,
+        precision::Int64,
         rate::Int64,
         nth::Int16) where Nx
 

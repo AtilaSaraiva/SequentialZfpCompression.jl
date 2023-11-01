@@ -22,10 +22,10 @@ mutable struct CompressedArraySeq{T,Nx} <: AbstractCompArraySeq
     timedim::Int32
     eltype::Type{T}
     tol::Float32
-    precision::Float32
+    precision::Int64
     rate::Int64
 
-    function CompressedArraySeq(dtype::DataType, spacedim::Integer...; rate::Int=0, tol::Real=0, precision::Real=0)
+    function CompressedArraySeq(dtype::DataType, spacedim::Integer...; rate::Int=0, tol::Real=0, precision::Int=0)
         data = Vector{UInt8}()
         headpositions = Int64[0] # trick to avoid checking for the first iteration in the append! function
         tailpositions = Int64[0] # which means the timedim = length(tailpositions) - 1
