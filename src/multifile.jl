@@ -33,27 +33,28 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
                                          rate::Int=0, tol::Real=0, precision::Real=0,
                                          filepaths::Union{Vector{String}, String}="/tmp/seqcomp")
 
-        let nth = Threads.nthreads()
-
-          if typeof(filepaths) == String
-              filepaths_ = fill(filepaths, Threads.nthreads())
-              # create a vector like ["/tmp/seqcomp", "/tmp/seqcomp", ...]
-          else
-              filepaths_ = filepaths
-          end
-          files = map(filepaths_) do path
-              mkpath(path)
-              mktemp(path, cleanup=true) |> last
-          end # creates a [IOStream, IOStream, ...]
-
-          headpositions = zeros(Int64, nth) # trick to avoid checking for the first iteration in the append! function
-          tailpositions = zeros(Int64, nth) # which means the timedim = length(tailpositions) - Threads.nthreads()
-          eltype = dtype
-          timedim = 0
-
-          return new{dtype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, Int16(nth))
-
+        nth = min(Threads.nthreads(), spacedim[end]) |> Int16
+        if spacedim[end]/ceil(spacedim[end]/nth) < nth
+            nth = round(spacedim[end]/ceil(spacedim[end]/nth)) |> Int16
         end
+
+        if typeof(filepaths) == String
+            filepaths_ = fill(filepaths, nth)
+            # create a vector like ["/tmp/seqcomp", "/tmp/seqcomp", ...]
+        else
+            filepaths_ = filepaths
+        end
+        files = map(filepaths_) do path
+            mkpath(path)
+            mktemp(path, cleanup=true) |> last
+        end # creates a [IOStream, IOStream, ...]
+
+        headpositions = zeros(Int64, nth) # trick to avoid checking for the first iteration in the append! function
+        tailpositions = zeros(Int64, nth) # which means the timedim = length(tailpositions) - Threads.nthreads()
+        eltype = dtype
+        timedim = 0
+
+        return new{dtype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth)
     end
 
     # For custom outer constructors
@@ -75,7 +76,7 @@ end
 
 ax(A) = map(N->1:N, A.spacedim)
 dims(region) = map(r -> r[end] - r[1] + 1, region)
-posIdx(timeidx, threadidx) = (timeidx-1)*Threads.nthreads() + threadidx
+posIdx(timeidx, threadidx, nth) = (timeidx-1)*nth + threadidx
 
 Base.@propagate_inbounds function Base.getindex(compArray::CompressedMultiFileArraySeq, timeidx::Int)
     @boundscheck timeidx <= compArray.timedim || throw(BoundsError(compArray, timeidx))
@@ -84,8 +85,8 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedMultiFileAr
 
       decompArray = zeros(compArray.eltype, compArray.spacedim...)
 
-      @threads for (i, region) in collect(enumerate(SplitAxes(ax(compArray), nth)))
-          seek(compArray.files[i], compArray.tailpositions[posIdx(timeidx+1, i)]-1)
+      for (i, region) in collect(enumerate(SplitAxes(ax(compArray), nth)))
+          seek(compArray.files[i], compArray.tailpositions[posIdx(timeidx+1, i, nth)]-1)
           compressedVector = read(compArray.files[i], compArray.headpositions[(timeidx)*nth+i] - compArray.tailpositions[(timeidx)*nth+i] + 1)
           decomp = zeros(compArray.eltype, dims(region))
           zfp_decompress!(decomp, compressedVector;
