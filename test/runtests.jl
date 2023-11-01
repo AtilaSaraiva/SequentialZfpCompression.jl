@@ -6,10 +6,10 @@ using Test
         for dims in ((100, 100), (50,50,50))
             B = rand(dtype, dims...,3)
 
-            Bc = sc.CompressedMultiFileArraySeq(dtype, dims...)
+            Bc = sc.SeqCompressor(dtype, dims..., inmemory=true)
 
             for i = 1:3
-                append!(Bc, selectdim(B, ndims(B), i))
+                append!(Bc, selectdim(B, ndims(B), i) |> copy)
             end
 
             @test size(Bc) == (dims..., 3)
@@ -35,10 +35,10 @@ end
         for dims in ((100, 100), (50,50,50))
             B = rand(dtype, dims...,3)
 
-            Bc = sc.CompressedMultiFileArraySeq(dtype, dims...)
+            Bc = sc.SeqCompressor(dtype, dims..., inmemory=false)
 
             for i = 1:3
-                append!(Bc, selectdim(B, ndims(B), i))
+                append!(Bc, selectdim(B, ndims(B), i) |> copy)
             end
 
             @test size(Bc) == (dims..., 3)
