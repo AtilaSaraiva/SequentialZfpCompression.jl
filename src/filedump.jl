@@ -94,7 +94,7 @@ function loadCompressedMultiFileArraySeq(io)
     nth = read(io, Int16)
     tol = read(io, Float32)
     rate = read(io, Int64)
-    precision = read(io, Float32)
+    precision = read(io, Int64)
     eltype = read(io, Int8) |> convertIntToType
     headpositions = zeros(Int64, (timedim+1)*nth)
     tailpositions = zeros(Int64, (timedim+1)*nth)
