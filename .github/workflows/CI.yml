@@ -5,6 +5,7 @@ on:
       - main
     tags: ['*']
   pull_request:
+    types: [opened, created, edited, reopened, synchronize]
 concurrency:
   # Skip intermediate builds: always.
   # Cancel intermediate builds: only if it is a pull request build.
