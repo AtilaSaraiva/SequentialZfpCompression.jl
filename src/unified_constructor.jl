@@ -52,7 +52,7 @@ function SeqCompressor(dtype::DataType, spacedim::Integer...;
                        inmemory::Bool=true,
                        rate::Int=0, tol::Real=0, precision::Real=0,
                        filepaths::Union{Vector{String}, String}="",
-                       envVarPath::String="")
+                       envVarPath::String="", nthreads::Integer=-1)
 
     if inmemory && filepaths == "" && envVarPath == ""
         return CompressedArraySeq(dtype, spacedim...; rate=rate, tol=tol, precision=precision)
@@ -60,7 +60,7 @@ function SeqCompressor(dtype::DataType, spacedim::Integer...;
 
     if filepaths == ""
         return CompressedMultiFileArraySeq(dtype, spacedim...;
-                                           rate=rate, tol=tol, precision=precision)
+                                           rate=rate, tol=tol, precision=precision, nthreads=nthreads)
     end
 
     if envVarPath != ""
@@ -68,5 +68,5 @@ function SeqCompressor(dtype::DataType, spacedim::Integer...;
     end
 
     return CompressedMultiFileArraySeq(dtype, spacedim...;
-                                       rate=rate, tol=tol, precision=precision, filepaths=filepaths)
+                                       rate=rate, tol=tol, precision=precision, filepaths=filepaths, nthreads=nthreads)
 end

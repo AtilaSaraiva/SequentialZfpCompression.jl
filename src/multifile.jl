@@ -31,9 +31,13 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
 
     function CompressedMultiFileArraySeq(dtype::DataType, spacedim::Integer...;
                                          rate::Int=0, tol::Real=0, precision::Int=0,
-                                         filepaths::Union{Vector{String}, String}="/tmp/seqcomp")
+                                         filepaths::Union{Vector{String}, String}="/tmp/seqcomp", nthreads::Integer=-1)
 
-        nth = min(Threads.nthreads(), spacedim[end]) |> Int16
+        if nthreads > 0
+            nth = min(Threads.nthreads(), spacedim[end], nthreads) |> Int16
+        else
+            nth = min(Threads.nthreads(), spacedim[end]) |> Int16
+        end
 
         function correctNumberOfThreads(nth::Integer, N::Integer)
             step = ceil(Int, N/nth)
