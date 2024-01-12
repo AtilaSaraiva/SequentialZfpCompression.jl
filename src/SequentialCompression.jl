@@ -12,6 +12,6 @@ include("multifile.jl")
 include("unified_constructor.jl")
 include("filedump.jl")
 
-export SeqCompressor, save, load
+export SeqCompressor, save, load, totalsize
 
 end

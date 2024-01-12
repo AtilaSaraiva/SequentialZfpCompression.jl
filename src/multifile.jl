@@ -142,3 +142,12 @@ function Base.append!(compArray::CompressedMultiFileArraySeq{T,N}, array::Abstra
 
     end
 end
+
+"""
+    totalsize(compArray::CompressedMultiFileArraySeq)
+
+Returns the total size of the compressed data in bytes.
+"""
+function totalsize(compArray::CompressedMultiFileArraySeq)
+    return sum(map(filesize, compArray.files))
+end
