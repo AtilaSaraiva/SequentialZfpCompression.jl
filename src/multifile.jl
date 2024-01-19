@@ -94,7 +94,7 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedMultiFileAr
 
       decompArray = zeros(compArray.eltype, compArray.spacedim...)
 
-      for (i, region) in collect(enumerate(SplitAxes(ax(compArray), nth)))
+      @threads for (i, region) in collect(enumerate(SplitAxes(ax(compArray), nth)))
           seek(compArray.files[i], compArray.tailpositions[posIdx(timeidx+1, i, nth)]-1)
           compressedVector = read(compArray.files[i], compArray.headpositions[(timeidx)*nth+i] - compArray.tailpositions[(timeidx)*nth+i] + 1)
           decomp = zeros(compArray.eltype, dims(region))
