@@ -52,10 +52,10 @@ function SeqCompressor(dtype::DataType, spacedim::Integer...;
                        inmemory::Bool=true,
                        rate::Int=0, tol::Real=0, precision::Real=0,
                        filepaths::Union{Vector{String}, String}="",
-                       envVarPath::String="", nthreads::Integer=-1)
+                       envVarPath::String="", nthreads::Integer=-1, nt::Integer=1)
 
     if inmemory && filepaths == "" && envVarPath == ""
-        return CompressedArraySeq(dtype, spacedim...; rate=rate, tol=tol, precision=precision)
+        return CompressedArraySeq(dtype, spacedim...; rate=rate, tol=tol, precision=precision, nt=nt)
     end
 
     if filepaths == ""

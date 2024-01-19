@@ -25,14 +25,23 @@ mutable struct CompressedArraySeq{T,Nx} <: AbstractCompArraySeq
     precision::Int64
     rate::Int64
 
-    function CompressedArraySeq(dtype::DataType, spacedim::Integer...; rate::Int=0, tol::Real=0, precision::Int=0)
+    function CompressedArraySeq(dtype::DataType, spacedim::Integer...; nt::Integer=1, rate::Int=0, tol::Real=0, precision::Int=0)
         data = Vector{UInt8}()
         headpositions = Int64[0] # trick to avoid checking for the first iteration in the append! function
         tailpositions = Int64[0] # which means the timedim = length(tailpositions) - 1
         eltype = dtype
         timedim = 0
 
-        return new{dtype, length(spacedim)}(data, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate)
+        compSeq = new{dtype, length(spacedim)}(data, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate)
+
+        expectedSize = length(zfp_compress(rand(dtype, spacedim...), write_header=false, rate=rate, tol=tol, precision=precision))
+        if rate > 0 || precision > 0
+            sizehint!(compSeq.data, nt*expectedSize+1)
+        else tol > 0
+            sizehint!(compSeq.data, Int64(round(nt*expectedSize*0.7)))
+        end
+
+        return compSeq
     end
 end
 
@@ -62,7 +71,7 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedArraySeq, t
 
     decompArray = zeros(compArray.eltype, compArray.spacedim...)
     @inbounds zfp_decompress!(decompArray,
-                              compArray.data[compArray.tailpositions[timeidx+1]:compArray.headpositions[timeidx+1]];
+                              @views compArray.data[compArray.tailpositions[timeidx+1]:compArray.headpositions[timeidx+1]];
                               tol=compArray.tol, precision=compArray.precision, rate=compArray.rate)
     return decompArray
 end
@@ -89,3 +98,13 @@ function Base.append!(compArray::CompressedArraySeq{T,N}, array::AbstractArray{T
     compArray.timedim += 1
     return nothing
 end
+
+# function Base.read!(compArray::CompressedArraySeq{T,N}, outArray::AbstractArray{T,N}, timeidx::Int) where {T<:AbstractFloat, N}
+    # @boundscheck timeidx <= compArray.timedim || throw(BoundsError(compArray, timeidx))
+
+    # @inbounds zfp_decompress!(decompArray,
+                              # compArray.data[compArray.tailpositions[timeidx+1]:compArray.headpositions[timeidx+1]];
+                              # tol=compArray.tol, precision=compArray.precision, rate=compArray.rate)
+
+    # return nothing
+# end
