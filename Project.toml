@@ -10,7 +10,10 @@ TiledIteration = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 ZfpCompression = "43441a71-1662-41c6-b8ea-40ed1525242b"
 
 [compat]
-julia = "1.9"
+
+julia = "1"
+ZfpCompression = "0.2"
+TiledIteration = "0.5"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
