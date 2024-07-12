@@ -1,6 +1,6 @@
 name = "SequentialZfpCompression"
 uuid = "a090a8c4-0549-4ee2-a6c2-f599d7ae654c"
-authors = ["Átila Saraiva Quintela Soares"]
+authors = ["Átila Saraiva Quintela Soares <atilasaraiva@gmail.com>"]
 version = "0.1.0"
 
 [deps]
@@ -10,7 +10,6 @@ TiledIteration = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 ZfpCompression = "43441a71-1662-41c6-b8ea-40ed1525242b"
 
 [compat]
-
 julia = "1"
 ZfpCompression = "0.2"
 TiledIteration = "0.5"
