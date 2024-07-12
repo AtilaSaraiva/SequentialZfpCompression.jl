@@ -1,14 +1,14 @@
 ```@meta
-CurrentModule = SequentialCompression
+CurrentModule = SequentialZfpCompression
 ```
 
-# SequentialCompression
+# SequentialZfpCompression
 
-Documentation for [SequentialCompression](https://github.com/AtilaSaraiva/SequentialCompression.jl).
+Documentation for [SequentialZfpCompression](https://github.com/AtilaSaraiva/SequentialZfpCompression.jl).
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [SequentialCompression]
+Modules = [SequentialZfpCompression]
 ```

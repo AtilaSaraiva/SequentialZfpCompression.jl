@@ -1,16 +1,16 @@
-using SequentialCompression
+using SequentialZfpCompression
 using Documenter
 
-DocMeta.setdocmeta!(SequentialCompression, :DocTestSetup, :(using SequentialCompression); recursive=true)
+DocMeta.setdocmeta!(SequentialZfpCompression, :DocTestSetup, :(using SequentialZfpCompression); recursive=true)
 
 makedocs(;
-    modules=[SequentialCompression],
+    modules=[SequentialZfpCompression],
     authors="Átila Saraiva Quintela Soares",
-    repo="https://github.com/AtilaSaraiva/SequentialCompression.jl/blob/{commit}{path}#{line}",
-    sitename="SequentialCompression.jl",
+    repo="https://github.com/AtilaSaraiva/SequentialZfpCompression.jl/blob/{commit}{path}#{line}",
+    sitename="SequentialZfpCompression.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://AtilaSaraiva.github.io/SequentialCompression.jl",
+        canonical="https://AtilaSaraiva.github.io/SequentialZfpCompression.jl",
         edit_link="main",
         assets=String[],
     ),
@@ -20,6 +20,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/AtilaSaraiva/SequentialCompression.jl",
+    repo="github.com/AtilaSaraiva/SequentialZfpCompression.jl",
     devbranch="main",
 )

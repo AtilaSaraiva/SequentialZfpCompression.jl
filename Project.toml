@@ -1,4 +1,4 @@
-name = "SequentialCompression"
+name = "SequentialZfpCompression"
 uuid = "a090a8c4-0549-4ee2-a6c2-f599d7ae654c"
 authors = ["Átila Saraiva Quintela Soares"]
 version = "0.1.0"

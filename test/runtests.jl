@@ -1,4 +1,4 @@
-import SequentialCompression as sc
+import SequentialZfpCompression as sc
 using Test
 import Random
 

@@ -61,6 +61,6 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using SequentialCompression
-            DocMeta.setdocmeta!(SequentialCompression, :DocTestSetup, :(using SequentialCompression); recursive=true)
-            doctest(SequentialCompression)'
+            using SequentialZfpCompression
+            DocMeta.setdocmeta!(SequentialZfpCompression, :DocTestSetup, :(using SequentialZfpCompression); recursive=true)
+            doctest(SequentialZfpCompression)'

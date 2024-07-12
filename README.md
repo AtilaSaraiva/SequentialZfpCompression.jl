@@ -1,9 +1,9 @@
-# SequentialCompression
+# SequentialZfpCompression
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://AtilaSaraiva.github.io/SequentialCompression.jl/stable/)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://AtilaSaraiva.github.io/SequentialCompression.jl/dev/)
-[![Build Status](https://github.com/AtilaSaraiva/SequentialCompression.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/AtilaSaraiva/SequentialCompression.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/AtilaSaraiva/SequentialCompression.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/AtilaSaraiva/SequentialCompression.jl)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://AtilaSaraiva.github.io/SequentialZfpCompression.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://AtilaSaraiva.github.io/SequentialZfpCompression.jl/dev/)
+[![Build Status](https://github.com/AtilaSaraiva/SequentialZfpCompression.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/AtilaSaraiva/SequentialZfpCompression.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/AtilaSaraiva/SequentialZfpCompression.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/AtilaSaraiva/SequentialZfpCompression.jl)
 
 This package aims to provide a nice interface for compression of multiple arrays of the same size in
 sequence. These arrays can be up to 4D. The intended application is to store snapshots of a iterative
@@ -29,7 +29,7 @@ on these functions might also help.
 Here is an simple example of its usage. Imagine these A1 till A3 arrays are snapshots of a iterative process.
 
 ```julia
-using SequentialCompression
+using SequentialZfpCompression
 using Test
 
 # Lets define a few arrays to compress

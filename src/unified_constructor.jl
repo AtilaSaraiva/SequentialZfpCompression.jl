@@ -24,10 +24,10 @@ using a SLURM job scheduler, for example, since the local disk of the node can b
 
 # Example
 ```jldoctest
-julia> using SequentialCompression
+julia> using SequentialZfpCompression
 
 julia> A = SeqCompressor(Float64, 4, 4)
-SequentialCompression.CompressedArraySeq{Float64, 2}(UInt8[], [0], [0], (4, 4), 0, Float64, 0.0f0, 0, 0)
+SequentialZfpCompression.CompressedArraySeq{Float64, 2}(UInt8[], [0], [0], (4, 4), 0, Float64, 0.0f0, 0, 0)
 
 julia> A.timedim
 0

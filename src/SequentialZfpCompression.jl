@@ -1,4 +1,4 @@
-module SequentialCompression
+module SequentialZfpCompression
 
 using ZfpCompression: zfp_compress, zfp_decompress!
 using TiledIteration: SplitAxes
