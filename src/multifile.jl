@@ -54,17 +54,20 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
         else
             filepaths_ = filepaths
         end
-        files = map(filepaths_) do path
+        pathAndIO = map(filepaths_) do path
             mkpath(path)
-            mktemp(path, cleanup=true) |> last
-        end # creates a [IOStream, IOStream, ...]
+            mktemp(path, cleanup=true)
+        end
+
+        paths = map(x->first(x), pathAndIO)
+        ioVector = map(x->last(x), pathAndIO) # creates a [IOStream, IOStream, ...]
 
         headpositions = zeros(Int64, nth) # trick to avoid checking for the first iteration in the append! function
         tailpositions = zeros(Int64, nth) # which means the timedim = length(tailpositions) - Threads.nthreads()
         eltype = dtype
         timedim = 0
 
-        return new{dtype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, filepaths_)
+        return new{dtype, length(spacedim)}(ioVector, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, paths)
     end
 
     # For custom outer constructors
