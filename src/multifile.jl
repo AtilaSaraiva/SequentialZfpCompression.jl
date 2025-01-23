@@ -28,6 +28,7 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
     precision::Int64
     rate::Int64
     nth::Int16
+    filePaths::Vector{String}
 
     function CompressedMultiFileArraySeq(dtype::DataType, spacedim::Integer...;
                                          rate::Int=0, tol::Real=0, precision::Int=0,
@@ -63,7 +64,7 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
         eltype = dtype
         timedim = 0
 
-        return new{dtype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth)
+        return new{dtype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, filepaths_)
     end
 
     # For custom outer constructors
