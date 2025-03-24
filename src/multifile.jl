@@ -81,9 +81,10 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
         tol::Float32,
         precision::Int64,
         rate::Int64,
-        nth::Int16) where Nx
+        nth::Int16,
+        filePaths::Vector{String}) where Nx
 
-        return new{eltype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth)
+        return new{eltype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, filePaths)
     end
 end
 
