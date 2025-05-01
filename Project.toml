@@ -1,7 +1,7 @@
 name = "SequentialZfpCompression"
 uuid = "a090a8c4-0549-4ee2-a6c2-f599d7ae654c"
 authors = ["Átila Saraiva Quintela Soares <atilasaraiva@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
