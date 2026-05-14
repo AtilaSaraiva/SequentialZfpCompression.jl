@@ -1,4 +1,25 @@
 """
+    finalizeMultiFile(comp)
+
+Cleanup function for `CompressedMultiFileArraySeq`. Closes all open file streams
+and removes the temporary files from disk.
+
+# Arguments
+- `comp`: A `CompressedMultiFileArraySeq` object containing the file streams and paths to clean up.
+"""
+function finalizeMultiFile!(comp)
+    for (io, path) in zip(comp.files, comp.filePaths)
+        if isopen(io) 
+            close(io)
+        end
+        if isfile(path)
+            rm(path, force=true)
+        end
+    end
+end
+
+
+"""
     CompressedMultiFileArraySeq{T,Nx}
 
 A compressed time-dependent array that is stored in multiple files, one per thread.
@@ -67,7 +88,9 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
         eltype = dtype
         timedim = 0
 
-        return new{dtype, length(spacedim)}(ioVector, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, paths)
+        obj = new{dtype, length(spacedim)}(ioVector, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, paths)
+        finalizer(finalizeMultiFile!, obj)
+        return obj
     end
 
     # For custom outer constructors
@@ -84,7 +107,8 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
         nth::Int16,
         filePaths::Vector{String}) where Nx
 
-        return new{eltype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, filePaths)
+        obj = new{eltype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, filePaths)
+        finalizer(finalizeMultiFile!, obj)
     end
 end
 
@@ -155,4 +179,18 @@ Returns the total size of the compressed data in bytes.
 """
 function totalsize(compArray::CompressedMultiFileArraySeq)
     return sum(map(filesize, compArray.files))
+end
+
+
+"""
+    cleanup!(comp:CompressedMultiFileArraySeq)
+
+Cleanup function for `CompressedMultiFileArraySeq`. Closes all open file streams
+and removes the temporary files from disk.
+
+# Arguments
+- `comp`: A `CompressedMultiFileArraySeq` object containing the file streams and paths to clean up.
+"""
+function cleanup!(comp::CompressedMultiFileArraySeq)
+    finalizeMultiFile!(comp)
 end
