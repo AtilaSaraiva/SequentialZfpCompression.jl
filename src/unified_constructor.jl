@@ -50,9 +50,20 @@ julia> size(A)
 """
 function SeqCompressor(dtype::DataType, spacedim::Integer...;
                        inmemory::Bool=true,
+                       mmap::Bool=false,
                        rate::Int=0, tol::Real=0, precision::Real=0,
                        filepaths::Union{Vector{String}, String}="",
                        envVarPath::String="", nthreads::Integer=-1, nt::Integer=1)
+
+    if mmap
+        fp = envVarPath != "" ? ENV[envVarPath] : filepaths
+        if fp == ""
+            return CompressedMmapArraySeq(dtype, spacedim...;
+                                          rate=rate, tol=tol, precision=precision, nthreads=nthreads)
+        end
+        return CompressedMmapArraySeq(dtype, spacedim...;
+                                      rate=rate, tol=tol, precision=precision, filepaths=fp, nthreads=nthreads)
+    end
 
     if inmemory && filepaths == "" && envVarPath == ""
         return CompressedArraySeq(dtype, spacedim...; rate=rate, tol=tol, precision=precision, nt=nt)

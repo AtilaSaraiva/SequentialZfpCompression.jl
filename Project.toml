@@ -1,18 +1,20 @@
 name = "SequentialZfpCompression"
 uuid = "a090a8c4-0549-4ee2-a6c2-f599d7ae654c"
-authors = ["Átila Saraiva Quintela Soares <atilasaraiva@gmail.com>"]
 version = "0.2.0"
+authors = ["Átila Saraiva Quintela Soares <atilasaraiva@gmail.com>"]
 
 [deps]
+Mmap = "a63ad114-7e13-5084-954f-fe012c677804"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 TiledIteration = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 ZfpCompression = "43441a71-1662-41c6-b8ea-40ed1525242b"
 
 [compat]
-julia = "1"
-ZfpCompression = "0.2"
+Mmap = "1.11.0"
 TiledIteration = "0.5"
+ZfpCompression = "0.2"
+julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
