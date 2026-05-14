@@ -1,4 +1,25 @@
 """
+    finalizeMultiFile(comp)
+
+Cleanup function for `CompressedMultiFileArraySeq`. Closes all open file streams
+and removes the temporary files from disk.
+
+# Arguments
+- `comp`: A `CompressedMultiFileArraySeq` object containing the file streams and paths to clean up.
+"""
+function finalizeMultiFile(comp)
+    for (io, path) in zip(comp.files, comp.filePaths)
+        if isopen(io) 
+            close(io)
+        end
+        if isfile(path)
+            rm(path, force=true)
+        end
+    end
+end
+
+
+"""
     CompressedMultiFileArraySeq{T,Nx}
 
 A compressed time-dependent array that is stored in multiple files, one per thread.
@@ -68,16 +89,7 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
         timedim = 0
 
         obj = new{dtype, length(spacedim)}(ioVector, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, paths)
-        finalizer(obj) do comp
-            for (io, path) in zip(comp.files, comp.filePaths)
-                if isopen(io) 
-                    close(io)
-                end
-                if isfile(path)
-                    rm(path, force=true)
-                end
-            end
-        end
+        finalizer(finalizeMultiFile, obj)
         return obj
     end
 
@@ -96,17 +108,7 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
         filePaths::Vector{String}) where Nx
 
         obj = new{eltype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, filePaths)
-        finalizer(obj) do comp
-            for (io, path) in zip(comp.files, comp.filePaths)
-                if isopen(io) 
-                    close(io)
-                end
-                if isfile(path)
-                    rm(path, force=true)
-                end
-            end
-        end
-        return obj
+        finalizer(finalizeMultiFile, obj)
     end
 end
 
