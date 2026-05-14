@@ -71,3 +71,28 @@ end
         end
     end
 end
+
+function tempFunction()
+    dtype = Float32
+    dims = (100, 100)
+    B = rand(dtype, dims...,3)
+
+    Bc = sc.SeqCompressor(dtype, dims..., filepaths="/tmp/tempFolderThatShouldHaveItsFilesDeletedOnGC")
+
+    for i = 1:3
+        append!(Bc, selectdim(B, ndims(B), i) |> copy)
+    end
+
+    filePaths = copy(Bc.filePaths)
+
+    sc.cleanup!(Bc)
+
+    return filePaths
+end
+
+@testset "test finalizer" begin
+
+    filePaths = tempFunction()
+    
+    @test !any(isfile.(filePaths))
+end
