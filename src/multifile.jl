@@ -67,7 +67,18 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
         eltype = dtype
         timedim = 0
 
-        return new{dtype, length(spacedim)}(ioVector, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, paths)
+        obj = new{dtype, length(spacedim)}(ioVector, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, paths)
+        finalizer(obj) do comp
+            for (io, path) in zip(comp.files, comp.filePaths)
+                if isopen(io) 
+                    close(io)
+                end
+                if isfile(path)
+                    rm(path, force=true)
+                end
+            end
+        end
+        return obj
     end
 
     # For custom outer constructors
@@ -84,7 +95,18 @@ mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
         nth::Int16,
         filePaths::Vector{String}) where Nx
 
-        return new{eltype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, filePaths)
+        obj = new{eltype, length(spacedim)}(files, headpositions, tailpositions, spacedim, timedim, eltype, tol, precision, rate, nth, filePaths)
+        finalizer(obj) do comp
+            for (io, path) in zip(comp.files, comp.filePaths)
+                if isopen(io) 
+                    close(io)
+                end
+                if isfile(path)
+                    rm(path, force=true)
+                end
+            end
+        end
+        return obj
     end
 end
 
