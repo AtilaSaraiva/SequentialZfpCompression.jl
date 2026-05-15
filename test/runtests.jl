@@ -108,6 +108,7 @@ end
             for i in 1:3
                 append!(Bc, selectdim(B, ndims(B), i) |> copy)
             end
+            sc.refreshMmaps!(Bc)
 
             @test size(Bc) == (dims..., 3)
             @test ndims(Bc) == ndims(B)

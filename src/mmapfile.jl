@@ -152,7 +152,6 @@ function Base.append!(compArray::CompressedMmapArraySeq{T,N}, array::AbstractArr
         append!(compArray.tailpositions, auxTailPosition)
         compArray.timedim += 1
 
-        refreshMmaps!(compArray)
         return nothing
     end
 end

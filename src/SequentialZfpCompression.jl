@@ -14,6 +14,6 @@ include("mmapfile.jl")
 include("unified_constructor.jl")
 include("filedump.jl")
 
-export SeqCompressor, save, load, totalsize, cleanup!, CompressedMmapArraySeq
+export SeqCompressor, save, load, totalsize, cleanup!, CompressedMmapArraySeq, refreshMmaps!
 
 end
