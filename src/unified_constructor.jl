@@ -1,39 +1,42 @@
 """
     SeqCompressor(dtype::DataType, spacedim::Integer...;
+                  inmemory::Bool=true, mmap::Bool=false,
                   rate::Int=0, tol::Real=0, precision::Real=0,
                   filepaths::Union{Vector{String}, String}="",
-                  envVarPath::String="")
+                  envVarPath::String="", nthreads::Integer=-1, nt::Integer=1)
 
-Construct a `CompressedArraySeq` or `CompressedMultiFileArraySeq` depending on the arguments.
+Construct a compressed sequential array, choosing the backend based on the arguments:
+
+| Condition | Backend |
+|-----------|---------|
+| `mmap=true` | `CompressedMmapArraySeq` — file-backed, zero-copy reads via mmap. Call `refreshMmaps!` once after all `append!` calls and before any indexing. |
+| `inmemory=true` (default) | `CompressedArraySeq` — all data held in a `Vector{UInt8}` in RAM. |
+| `inmemory=false` | `CompressedMultiFileArraySeq` — file-backed with standard seek/read IO. |
 
 # Arguments
-- `dtype::DataType`: the type of the array to be compressed
-- `spacedim::Integer...`: the dimensions of the array to be compressed
-- `inmemory::Bool=true`: whether the compressed data will be stored in memory or in disk
-- `rate::Int64`: [Fixes the bits used per value](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode).
-- `tol::Float32`: [Mean absolute error that is tolerated](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode).
-- `precision::Float32`: [Controls the precision, bounding a weak relative error](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode).
-- `filepaths::Union{Vector{String}, String}=""`: the path(s) to the files to be compressed
-- `envVarPath::String=""`: the name of the environment variable that contains the path to the files to be compressed
+- `dtype::DataType`: element type of the arrays to compress (e.g. `Float32`, `Float64`).
+- `spacedim::Integer...`: spatial dimensions of each time slice.
+- `inmemory::Bool=true`: store compressed data in memory (ignored when `mmap=true`).
+- `mmap::Bool=false`: use memory-mapped file backend for zero-copy reads.
+- `rate::Int=0`: [fixed-rate mode](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-rate-mode) — bits per value.
+- `tol::Real=0`: [fixed-accuracy mode](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-accuracy-mode) — maximum absolute error.
+- `precision::Real=0`: [fixed-precision mode](https://zfp.readthedocs.io/en/release0.5.5/modes.html#fixed-precision-mode) — number of uncompressed bits per value.
+- `filepaths::Union{Vector{String}, String}=""`: directory or per-thread file paths for
+  file-backed backends. A single string is used as a directory for all threads; a vector
+  must have one entry per thread. Ignored for `inmemory=true`.
+- `envVarPath::String=""`: name of an environment variable whose value is used as the file
+  path (useful with SLURM's `SLURM_TMPDIR`). Takes precedence over `filepaths`.
+- `nthreads::Integer=-1`: maximum number of threads to use. Defaults to `Threads.nthreads()`.
+- `nt::Integer=1`: expected number of time steps, used to pre-allocate the in-memory buffer.
 
-You have the option of passing an environment variable, a file path, a vector of file paths, or nothing.
-If you pass a vector of file paths, the number of paths must be equal to the number of threads.
-If you pass a single file path, the same path will be used for all threads.
-If you pass an environment variable, the file path will be extracted from it. It might be useful if you are
-using a SLURM job scheduler, for example, since the local disk of the node can be accessed by ENV["SLURM_TMPDIR"].
+# Examples
 
-# Example
+In-memory (default):
 ```jldoctest
 julia> using SequentialZfpCompression
 
 julia> A = SeqCompressor(Float64, 4, 4)
 SequentialZfpCompression.CompressedArraySeq{Float64, 2}(UInt8[], [0], [0], (4, 4), 0, Float64, 0.0f0, 0, 0)
-
-julia> A.timedim
-0
-
-julia> size(A)
-(4, 4, 0)
 
 julia> append!(A, ones(Float64, 4, 4));
 
@@ -47,12 +50,33 @@ julia> A[1]
 julia> size(A)
 (4, 4, 1)
 ```
+
+Memory-mapped (write all, then refresh once before reading):
+```julia
+A = SeqCompressor(Float32, 64, 64; mmap=true)
+for t in 1:100
+    append!(A, my_slice(t))
+end
+refreshMmaps!(A)   # map the completed files into memory
+A[50]              # zero-copy read
+```
 """
 function SeqCompressor(dtype::DataType, spacedim::Integer...;
                        inmemory::Bool=true,
+                       mmap::Bool=false,
                        rate::Int=0, tol::Real=0, precision::Real=0,
                        filepaths::Union{Vector{String}, String}="",
                        envVarPath::String="", nthreads::Integer=-1, nt::Integer=1)
+
+    if mmap
+        fp = envVarPath != "" ? ENV[envVarPath] : filepaths
+        if fp == ""
+            return CompressedMmapArraySeq(dtype, spacedim...;
+                                          rate=rate, tol=tol, precision=precision, nthreads=nthreads)
+        end
+        return CompressedMmapArraySeq(dtype, spacedim...;
+                                      rate=rate, tol=tol, precision=precision, filepaths=fp, nthreads=nthreads)
+    end
 
     if inmemory && filepaths == "" && envVarPath == ""
         return CompressedArraySeq(dtype, spacedim...; rate=rate, tol=tol, precision=precision, nt=nt)

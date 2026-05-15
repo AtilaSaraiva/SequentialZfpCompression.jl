@@ -93,6 +93,59 @@ end
 @testset "test finalizer" begin
 
     filePaths = tempFunction()
-    
+
+    @test !any(isfile.(filePaths))
+end
+
+@testset "mmap read before refresh error" begin
+    Bc = sc.SeqCompressor(Float32, 10, 10; mmap=true)
+    append!(Bc, rand(Float32, 10, 10))
+    @test_throws ArgumentError Bc[1]
+end
+
+@testset "mmap compression" begin
+    Random.seed!(7)
+    for dtype in [Float32, Float64]
+        for dims in ((100, 100), (50, 50, 50))
+            B = rand(dtype, dims..., 3)
+
+            Bc = sc.SeqCompressor(dtype, dims...; mmap=true)
+
+            for i in 1:3
+                append!(Bc, selectdim(B, ndims(B), i) |> copy)
+            end
+            sc.refreshMmaps!(Bc)
+
+            @test size(Bc) == (dims..., 3)
+            @test ndims(Bc) == ndims(B)
+
+            @test Bc[1] == selectdim(B, ndims(B), 1)
+            @test Bc[2] == selectdim(B, ndims(B), 2)
+            @test Bc[3] == selectdim(B, ndims(B), 3)
+
+            @test Bc[:] == B
+        end
+    end
+end
+
+function tempMmapFunction()
+    dtype = Float32
+    dims = (100, 100)
+    B = rand(dtype, dims..., 3)
+
+    Bc = sc.SeqCompressor(dtype, dims...; mmap=true,
+                          filepaths="/tmp/tempMmapFolderForGCTest")
+
+    for i in 1:3
+        append!(Bc, selectdim(B, ndims(B), i) |> copy)
+    end
+
+    filePaths = copy(Bc.filePaths)
+    sc.cleanup!(Bc)
+    return filePaths
+end
+
+@testset "mmap finalizer" begin
+    filePaths = tempMmapFunction()
     @test !any(isfile.(filePaths))
 end
