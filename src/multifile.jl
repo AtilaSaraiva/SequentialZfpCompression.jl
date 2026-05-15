@@ -38,7 +38,7 @@ A compressed time-dependent array that is stored in multiple files, one per thre
 # Arguments exclusive for the constructor
 - `filepaths::Union{Vector{String}, String}="/tmp/seqcomp"`: Path(s) to the files where the compressed data will be stored. If only one string is passed, the same path will be used for all threads.
 """
-mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractCompArraySeq
+mutable struct CompressedMultiFileArraySeq{T,Nx} <: AbstractFileBackedArraySeq{T,Nx}
     files::Vector{IOStream}
     headpositions::Vector{Int64}
     tailpositions::Vector{Int64}
@@ -146,7 +146,7 @@ function Base.getindex(compArray::AbstractCompArraySeq, timeidx::Colon)
     return decompArray
 end
 
-function Base.append!(compArray::CompressedMultiFileArraySeq{T,N}, array::AbstractArray{T,N}) where {T<:AbstractFloat, N}
+function Base.append!(compArray::AbstractFileBackedArraySeq{T,N}, array::AbstractArray{T,N}) where {T<:AbstractFloat, N}
 
     let nth = compArray.nth
 
@@ -177,8 +177,8 @@ end
 
 Returns the total size of the compressed data in bytes.
 """
-function totalsize(compArray::CompressedMultiFileArraySeq)
-    return sum(map(filesize, compArray.files))
+function totalsize(compArray::AbstractFileBackedArraySeq)
+    return sum(map(filesize, compArray.filePaths))
 end
 
 

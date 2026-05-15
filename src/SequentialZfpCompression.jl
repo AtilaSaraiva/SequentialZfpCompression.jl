@@ -7,6 +7,7 @@ using Serialization: serialize, deserialize
 using Mmap
 
 abstract type AbstractCompArraySeq end
+abstract type AbstractFileBackedArraySeq{T,Nx} <: AbstractCompArraySeq end
 
 include("seqcomp.jl")
 include("multifile.jl")

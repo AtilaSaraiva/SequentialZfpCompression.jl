@@ -38,7 +38,7 @@ OS-mapped pages without an extra allocation or copy.
 - `filepaths::Union{Vector{String}, String}="/tmp/seqcomp"`: Directory (or per-thread paths)
   where temporary files are created.
 """
-mutable struct CompressedMmapArraySeq{T,Nx} <: AbstractCompArraySeq
+mutable struct CompressedMmapArraySeq{T,Nx} <: AbstractFileBackedArraySeq{T,Nx}
     files::Vector{IOStream}
     mmaps::Vector{Vector{UInt8}}
     headpositions::Vector{Int64}
@@ -130,41 +130,6 @@ Base.@propagate_inbounds function Base.getindex(compArray::CompressedMmapArraySe
 
         return decompArray
     end
-end
-
-
-function Base.append!(compArray::CompressedMmapArraySeq{T,N}, array::AbstractArray{T,N}) where {T<:AbstractFloat, N}
-    let nth = compArray.nth
-        auxHeadPosition = Vector{Int64}(undef, nth)
-        auxTailPosition = Vector{Int64}(undef, nth)
-
-        @threads for (i, region) in collect(enumerate(SplitAxes(ax(compArray), nth)))
-            data = zfp_compress(array[region...],
-                                write_header=false,
-                                tol=compArray.tol, precision=compArray.precision, rate=compArray.rate)
-            fileSize = length(data)
-            seekend(compArray.files[i])
-            write(compArray.files[i], data)
-            auxTailPosition[i] = compArray.headpositions[end-nth+i] + 1
-            auxHeadPosition[i] = compArray.headpositions[end-nth+i] + fileSize
-        end
-
-        append!(compArray.headpositions, auxHeadPosition)
-        append!(compArray.tailpositions, auxTailPosition)
-        compArray.timedim += 1
-
-        return nothing
-    end
-end
-
-
-"""
-    totalsize(compArray::CompressedMmapArraySeq)
-
-Returns the total size of the compressed data in bytes.
-"""
-function totalsize(compArray::CompressedMmapArraySeq)
-    return sum(map(filesize, compArray.filePaths))
 end
 
 
