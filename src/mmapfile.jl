@@ -113,6 +113,7 @@ end
 
 Base.@propagate_inbounds function Base.getindex(compArray::CompressedMmapArraySeq, timeidx::Int)
     @boundscheck timeidx <= compArray.timedim || throw(BoundsError(compArray, timeidx))
+    isempty(compArray.mmaps[1]) && throw(ArgumentError("call refreshMmaps! before reading from a CompressedMmapArraySeq"))
 
     let nth = compArray.nth
         decompArray = zeros(compArray.eltype, compArray.spacedim...)

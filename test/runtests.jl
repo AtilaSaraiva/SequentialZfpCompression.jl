@@ -97,6 +97,12 @@ end
     @test !any(isfile.(filePaths))
 end
 
+@testset "mmap read before refresh error" begin
+    Bc = sc.SeqCompressor(Float32, 10, 10; mmap=true)
+    append!(Bc, rand(Float32, 10, 10))
+    @test_throws ArgumentError Bc[1]
+end
+
 @testset "mmap compression" begin
     Random.seed!(7)
     for dtype in [Float32, Float64]
